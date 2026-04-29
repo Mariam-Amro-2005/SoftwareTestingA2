@@ -24,7 +24,6 @@ public class HomePage {
     By login = By.linkText("Login");
 
 
-    By searchInput = By.name("search");
     By searchBtn = By.cssSelector("#search button");
 
 
@@ -35,6 +34,11 @@ public class HomePage {
 
 
     By phonesAndPDAs = By.xpath("//a[contains(text(), 'Phones & PDAs')]");
+
+    By desktopsDropdown = By.xpath("//a[contains(text(),'Desktops')][@class='dropdown-toggle']");
+    By showAllDesktops  = By.xpath("//a[@class='see-all' and contains(text(),'Show AllDesktops')]");
+    By currencyDropdown = By.cssSelector("button.btn.btn-link.dropdown-toggle");
+    By euroCurrency     = By.xpath("//button[@name='EUR']");
 
 
     public void goToRegister(){
@@ -84,6 +88,25 @@ public class HomePage {
         wait.until(ExpectedConditions.elementToBeClickable(shoppingCart)).click();
     }
 
+    public void clickSearchIcon() {
+        wait.until(ExpectedConditions.elementToBeClickable(searchBtn)).click();
+    }
+
+    public void goToAllDesktops() {
+        wait.until(ExpectedConditions.elementToBeClickable(desktopsDropdown)).click();
+        wait.until(ExpectedConditions.elementToBeClickable(showAllDesktops)).click();
+    }
+
+    public void changeCurrencyToEuro() {
+        wait.until(ExpectedConditions.elementToBeClickable(currencyDropdown)).click();
+        wait.until(ExpectedConditions.elementToBeClickable(euroCurrency)).click();
+    }
+
+    public String getActiveCurrencySymbol() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(currencyDropdown))
+                .findElement(By.tagName("strong"))
+                .getText().trim();
+    }
 
 
 }

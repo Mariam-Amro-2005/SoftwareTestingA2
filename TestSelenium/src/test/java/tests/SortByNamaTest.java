@@ -12,10 +12,7 @@ public class SortByNamaTest extends BaseTest {
     public void sortByName(){
 
         HomePage home = new HomePage(driver);
-        home.goToLogin();
-
-        LoginPage login = new LoginPage(driver);
-        login.login("user22222@gmail.com", "12345");
+        login();
         driver.get("http://tutorialsninja.com/demo/index.php?route=common/home");
 
         home.goToPhonesAndPDAs();
@@ -25,8 +22,7 @@ public class SortByNamaTest extends BaseTest {
         phonesPage.sortByNameAscending();
         phonesPage.sortByNameDescending();
 
-        AccountPage account = new AccountPage(driver);
-        account.logout();
+        logout();
 
     }
 }
