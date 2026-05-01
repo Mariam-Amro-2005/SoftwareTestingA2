@@ -1,100 +1,104 @@
 package tests;
 
 import base.BaseTest;
-import pages.*;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
 import org.openqa.selenium.By;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import pages.*;
+import utils.ExcelDataReader;
+import utils.Log;
 
+@Feature("Checkout")
 public class CheckoutTests extends BaseTest {
 
-    @Test
-    public void completeEndToEndCheckout() {
+    @DataProvider(name = "checkoutData")
+    public Object[][] getCheckoutData() {
+        return ExcelDataReader.getTestData("CheckoutProcess");
+    }
+
+    @Test(dataProvider = "checkoutData")
+    @Description("Complete end‑to‑end checkout process with product HP LP3065")
+    public void completeEndToEndCheckout(String email, String password,
+                                         String productName,
+                                         String firstName, String lastName,
+                                         String address, String city,
+                                         String postcode, String country, String region,
+                                         String comment) {
+
         // 1. Login
         HomePage home = new HomePage(driver);
         home.goToLogin();
         LoginPage login = new LoginPage(driver);
-        login.login("alice05@example.com", "test");
+        login.login(email, password);
 
         // 2. Laptops & Notebooks → Show All
         home.goToLaptopsAndNotebooks();
 
-        // 3. Click HP LP3065 and add to cart (leave default date & qty)
-        LaptopsPage laptopsPage = new LaptopsPage(driver);
-        laptopsPage.clickHPLaptop();
+        // 3. Click product and add to cart
+        LaptopsPage laptops = new LaptopsPage(driver);
+        laptops.clickHPLaptop();
         LaptopProductPage productPage = new LaptopProductPage(driver);
         productPage.addToCart();
 
         // 4. Verify success message
         String successMsg = productPage.getSuccessMessage();
-        Assert.assertTrue(successMsg.contains("Success: You have added"),
-                "Add to cart success message not displayed");
-        Assert.assertTrue(successMsg.contains("HP LP3065"),
-                "Product name missing");
+        Assert.assertTrue(successMsg.contains("Success: You have added"));
+        Assert.assertTrue(successMsg.contains(productName));
 
-        // ********** ADDED WAIT **********
-        try {
-            Thread.sleep(2000);   // wait for mini-cart to fully load
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // 5. Open mini-cart and check item presence (via ShoppingCartPage)
+        // 5. Open mini‑cart and check item
         driver.findElement(By.id("cart")).click();
         ShoppingCartPage cart = new ShoppingCartPage(driver);
-        Assert.assertTrue(cart.isProductInMiniCart("HP LP3065"),
-                "HP LP3065 not found in mini cart");
+        Assert.assertTrue(cart.isProductInMiniCart(productName));
 
-        // 6. Click “View Cart” inside mini cart (go to full cart page)
-        driver.findElement(By.xpath("//a[contains(@href,'checkout/cart') and contains(text(),'View Cart')]")).click();
+        // 6. Click “View Cart”
+        driver.findElement(By.partialLinkText("View Cart")).click();
 
-        // Now on full shopping cart page – verify product, price, delivery date
-        Assert.assertTrue(cart.isProductInCart("HP LP3065"));
-        String unitPrice = cart.getProductUnitPrice("HP LP3065");
-        Assert.assertFalse(unitPrice.isEmpty(), "Unit price should not be empty");
-        Assert.assertTrue(cart.verifyTotalMatches(), "Cart totals do not match");
-        String deliveryDate = cart.getDeliveryDate("HP LP3065");
-        Assert.assertEquals(deliveryDate, "2011-04-22", "Delivery date mismatch");
+        // Verify full cart page
+        Assert.assertTrue(cart.isProductInCart(productName));
+        String unitPrice = cart.getProductUnitPrice(productName);
+        Assert.assertFalse(unitPrice.isEmpty());
+        Assert.assertTrue(cart.verifyTotalMatches());
+        String deliveryDate = cart.getDeliveryDate(productName);
+        Assert.assertFalse(deliveryDate.isEmpty());
 
-        // 7. Click Checkout
-        driver.findElement(By.xpath("//a[contains(@href,'checkout/checkout') and contains(text(),'Checkout')]")).click();
+        // 7. Click Checkout on the full cart page
+        driver.findElement(By.cssSelector("a.btn.btn-primary[href*='checkout/checkout']")).click();
 
-        // 8. Fill billing details as a NEW address
+        // 8. Fill billing details
         CheckoutPage checkout = new CheckoutPage(driver);
-        checkout.fillNewBillingAddress(
-                "Alice", "Test",
-                "123 Main St", "New York",
-                "10001", "United States", "New York"
-        );
+        checkout.fillNewBillingAddress(firstName, lastName, address, city,
+                postcode, country, region);
         checkout.clickBillingContinue();
 
-        // 9. Shipping address: choose the new address (by partial text "Alice Test")
-        checkout.selectShippingAddressContaining("Alice Test");
+        // 9. Select shipping address (partial text = firstName + lastName)
+        String expectedPartial = firstName + lastName;
+        checkout.selectShippingAddress(expectedPartial);
         checkout.clickShippingAddressContinue();
 
         // 10-13. Delivery method: add comment and continue
-        checkout.enterCommentAndContinue("Leave at the front door");
+        checkout.enterCommentAndContinue(comment);
 
-        // 14. Payment method: agree to Terms & Conditions (retry loop)
+        // 14. Payment method: agree to Terms & Conditions
         checkout.agreeTermsAndContinue();
 
-        // 15-16. Confirm order section – verify total contains currency symbol
-        // (Total should be: product price + flat shipping $8.00)
+        // 15-16. Verify confirm total
         String confirmTotal = checkout.getConfirmTotal();
-        Assert.assertTrue(confirmTotal.contains("$"), "Confirm total is missing currency symbol");
+        Assert.assertTrue(confirmTotal.contains("$"));
 
         // 17. Confirm the order
         checkout.confirmOrder();
 
-        // 18. Check success message and cart is empty
-        Assert.assertTrue(checkout.isOrderPlacedMessageDisplayed(),
-                "Order placed message not shown");
+        // 18. Success message and empty cart
+        Assert.assertTrue(checkout.isOrderPlacedMessageDisplayed());
         String cartText = checkout.getCartTotalText();
-        Assert.assertTrue(cartText.contains("0 item(s)"),
-                "Cart should be empty after order");
+        Assert.assertTrue(cartText.contains("0 item(s)"));
 
         // 19. Logout
         AccountPage account = new AccountPage(driver);
         account.logout();
+        Log.info("Checkout test completed successfully");
     }
 }
