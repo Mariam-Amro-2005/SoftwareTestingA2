@@ -31,9 +31,9 @@ public class AccountPage {
         return driver.findElement(successHeader).isDisplayed();
     }
 
-    public boolean isLogoutDisplayed(){
-
-        return driver.findElement(logoutLink).isDisplayed();
+    public boolean isLogoutDisplayed() {
+        return !driver.findElements(logoutLink).isEmpty() &&
+                driver.findElements(logoutLink).get(0).isDisplayed();
     }
 
     public void logout(){
