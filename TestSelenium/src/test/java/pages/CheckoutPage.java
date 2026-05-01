@@ -31,14 +31,14 @@ public class CheckoutPage {
 
     // Shipping Address – Step 3
     private final By shippingAddressPanelLink = By.cssSelector("a[href='#collapse-shipping-address']");
-    private final By shippingAddressDropdown  = By.id("input-shipping-address");
-    private final By shippingAddressContinue  = By.id("button-shipping-address");
+    private final By shippingExistingRadio   = By.cssSelector("input[name='shipping_address'][value='existing']");
+    private final By shippingAddressDropdown = By.id("input-shipping-address");
+    private final By shippingAddressContinue = By.id("button-shipping-address");
 
     // Delivery Method – Step 4
     private final By shippingMethodPanelLink = By.cssSelector("a[href='#collapse-shipping-method']");
     private final By commentTextarea         = By.name("comment");
     private final By shippingMethodContinue  = By.id("button-shipping-method");
-    // Locator to check that the shipping method panel has content loaded (e.g. the radio button)
     private final By shippingMethodRadio     = By.cssSelector("#collapse-shipping-method .radio input");
 
     // Payment Method – Step 5
@@ -46,7 +46,6 @@ public class CheckoutPage {
     private final By termsCheckbox          = By.name("agree");
     private final By paymentContinue        = By.id("button-payment-method");
     private final By warningAlert           = By.cssSelector("div.alert.alert-danger");
-    // Locator to check that payment method panel has content
     private final By paymentMethodRadio     = By.cssSelector("#collapse-payment-method .radio input");
 
     // Confirm Order – Step 6
@@ -61,16 +60,18 @@ public class CheckoutPage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
-    /** Generic helper to expand a panel by its link. Waits for the panel to have the "in" class. */
+    private void sleepOneSec() {
+        try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+    }
+
+    /** Generic helper to expand a panel by its link. */
     private void openPanel(By panelLink) {
         WebElement link = wait.until(ExpectedConditions.elementToBeClickable(panelLink));
-        // Click only if the panel is not already open
         String href = link.getAttribute("href");
         String targetId = href.substring(href.indexOf("#"));
         By panelBody = By.cssSelector(targetId);
         WebElement panel = driver.findElement(panelBody);
-        String classes = panel.getAttribute("class");
-        if (classes == null || !classes.contains("in")) {
+        if (panel.getAttribute("class") == null || !panel.getAttribute("class").contains("in")) {
             link.click();
             wait.until(ExpectedConditions.attributeContains(panelBody, "class", "in"));
         }
@@ -118,7 +119,7 @@ public class CheckoutPage {
 
         new Select(driver.findElement(regionSelect)).selectByVisibleText(regionName);
         Log.info("Billing address filled successfully");
-        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        sleepOneSec();
     }
 
     @Step("Click Billing Continue")
@@ -132,8 +133,16 @@ public class CheckoutPage {
     @Step("Select shipping address containing: {partialText}")
     public void selectShippingAddress(String partialText) {
         Log.info("Selecting shipping address containing '" + partialText + "'");
-        // The billing continue already causes the shipping panel to open, but we double-check.
+        // Ensure the shipping panel is open
         openPanel(shippingAddressPanelLink);
+
+        // Ensure the "I want to use an existing address" radio is selected
+        WebElement existingRadio = wait.until(ExpectedConditions.elementToBeClickable(shippingExistingRadio));
+        if (!existingRadio.isSelected()) {
+            existingRadio.click();
+        }
+
+        sleepOneSec(); // wait for dropdown to be ready
         wait.until(ExpectedConditions.presenceOfElementLocated(shippingAddressDropdown));
         Select select = new Select(driver.findElement(shippingAddressDropdown));
         List<WebElement> options = select.getOptions();
@@ -143,7 +152,10 @@ public class CheckoutPage {
                 return;
             }
         }
-        if (options.size() > 0) select.selectByIndex(options.size() - 1);
+        // Fallback: select the last option (newest address)
+        if (options.size() > 0) {
+            select.selectByIndex(options.size() - 1);
+        }
     }
 
     @Step("Click Shipping Address Continue")
@@ -154,18 +166,15 @@ public class CheckoutPage {
 
     // -------------------- Delivery Method --------------------
 
-    /**
-     * Wait until the shipping method panel has been populated by AJAX.
-     * We then expand it and fill the comment.
-     */
     @Step("Enter delivery comment and continue: {comment}")
     public void enterCommentAndContinue(String comment) {
         Log.info("Waiting for shipping method to load...");
-        // Wait for a radio button to appear inside the shipping method panel
+        sleepOneSec(); // allow AJAX to start loading
+        // Wait until the radio button in the shipping method panel appears
         wait.until(ExpectedConditions.presenceOfElementLocated(shippingMethodRadio));
-        // Now ensure the panel is open (it should be, but we force it)
+        // Ensure panel is open (it should be, but we force)
         openPanel(shippingMethodPanelLink);
-        // Fill the comment
+        // Fill comment
         WebElement area = wait.until(ExpectedConditions.elementToBeClickable(commentTextarea));
         area.clear();
         area.sendKeys(comment);
@@ -177,7 +186,7 @@ public class CheckoutPage {
     @Step("Agree to Terms & Conditions and continue (retry up to 3 times)")
     public void agreeTermsAndContinue() {
         Log.info("Waiting for payment method to load...");
-        // Wait for payment method radio to appear
+        sleepOneSec(); // allow AJAX to load
         wait.until(ExpectedConditions.presenceOfElementLocated(paymentMethodRadio));
         openPanel(paymentMethodPanelLink);
 
@@ -202,7 +211,7 @@ public class CheckoutPage {
 
     @Step("Get confirm order total")
     public String getConfirmTotal() {
-        // The confirm panel is loaded after payment method continue
+        sleepOneSec(); // let panel load
         openPanel(confirmPanelLink);
         return wait.until(ExpectedConditions.visibilityOfElementLocated(orderTotalRow)).getText();
     }
