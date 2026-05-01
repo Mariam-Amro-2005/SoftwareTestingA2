@@ -1,25 +1,41 @@
 package base;
 
+import io.qameta.allure.Allure;
+import io.qameta.allure.Attachment;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.ITestResult;
+import org.testng.annotations.*;
 import pages.AccountPage;
 import pages.HomePage;
 import pages.LoginPage;
+import utils.ConfigReader;
+import utils.DriverFactory;
+import utils.ScreenshotUtil;
 
+import java.time.Duration;
+
+@Listeners({io.qameta.allure.testng.AllureTestNg.class})
 public class BaseTest {
     protected WebDriver driver;
 
     @BeforeMethod
-    public void setup() {
+    public void setUp() {
+        DriverFactory.setDriver();
+        driver = DriverFactory.getDriver();
+        driver.get(ConfigReader.getProperty("baseUrl"));
+    }
 
-        System.setProperty("webdriver.chrome.driver","chromedriver.exe");
-
-        driver = new ChromeDriver();
-        driver.manage().window().maximize();
-
-        driver.get("http://tutorialsninja.com/demo/index.php?route=common/home");
+    @AfterMethod
+    public void tearDown(ITestResult result) {
+        if (result.getStatus() == ITestResult.FAILURE) {
+            ScreenshotUtil.captureScreenshot(DriverFactory.getDriver(), result.getName());
+        }
+        DriverFactory.quitDriver();
     }
 
     protected void login() {
@@ -33,11 +49,5 @@ public class BaseTest {
     protected void logout() {
         AccountPage account = new AccountPage(driver);
         account.logout();
-    }
-
-    @AfterMethod
-    public void teardown() {
-
-        driver.quit();
     }
 }
