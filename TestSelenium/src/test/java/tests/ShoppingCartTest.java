@@ -43,18 +43,14 @@ public class ShoppingCartTest extends BaseTest {
         LoginPage login = new LoginPage(driver);
         ShoppingCartPage cartPage = new ShoppingCartPage(driver);
 
-        // =====================
-        // LOGIN
-        // =====================
+
         home.goToLogin();
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("input-email")));
 
         login.login(email, password);
 
-        // =====================
-        // TABLET FLOW
-        // =====================
+
         home.goToTablets();
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(
@@ -69,9 +65,7 @@ public class ShoppingCartTest extends BaseTest {
                 "Tablet not added successfully"
         );
 
-        // =====================
-        // CART CHECK (TABLET)
-        // =====================
+
         home.openShoppingCart();
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("content")));
@@ -87,9 +81,7 @@ public class ShoppingCartTest extends BaseTest {
                 "Tablet price mismatch"
         );
 
-        // =====================
-        // LAPTOP FLOW
-        // =====================
+
         home.goToLaptopsAndNotebooks();
 
         wait.until(ExpectedConditions.elementToBeClickable(
@@ -108,9 +100,7 @@ public class ShoppingCartTest extends BaseTest {
                 "Laptop not added successfully"
         );
 
-        // =====================
-        // CART CHECK (LAPTOP)
-        // =====================
+
         home.openShoppingCart();
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("content")));
@@ -127,17 +117,13 @@ public class ShoppingCartTest extends BaseTest {
                 "Delivery date mismatch"
         );
 
-        // =====================
-        // TOTAL CHECK
-        // =====================
+
         Assert.assertTrue(
                 cartPage.verifyTotalMatches(),
                 "Cart total mismatch"
         );
 
-        // =====================
-        // LOGOUT
-        // =====================
+
         AccountPage account = new AccountPage(driver);
         account.logout();
     }
