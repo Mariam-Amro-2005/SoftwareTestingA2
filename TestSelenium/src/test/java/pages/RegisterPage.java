@@ -2,6 +2,7 @@ package pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.NoSuchElementException;
 
 public class RegisterPage {
 
@@ -51,5 +52,35 @@ public class RegisterPage {
 
     public void clickContinue(){
         driver.findElement(continueBtn).click();
+    }
+
+    public String getEmailError() {
+        try {
+            return driver.findElement(
+                    By.xpath("//input[@id='input-email']/following-sibling::div[@class='text-danger']")
+            ).getText();
+        } catch (NoSuchElementException e) {
+            return "";
+        }
+    }
+
+    public String getTelephoneError() {
+        try {
+            return driver.findElement(
+                    By.xpath("//input[@id='input-telephone']/following-sibling::div[@class='text-danger']")
+            ).getText();
+        } catch (NoSuchElementException e) {
+            return "";
+        }
+    }
+
+    public String getPasswordError() {
+        try {
+            return driver.findElement(
+                    By.xpath("//input[@id='input-password']/following-sibling::div[@class='text-danger']")
+            ).getText();
+        } catch (NoSuchElementException e) {
+            return "";
+        }
     }
 }
