@@ -44,6 +44,7 @@ public class ShoppingCartPage {
             return false;
         }
     }
+
     public String getProductUnitPrice(String productName) {
         try {
             // Find the row that contains the product name and get the 5th column
@@ -103,5 +104,21 @@ public class ShoppingCartPage {
         }
     }
 
+    /**
+     * Checks if a product is in the mini‑cart dropdown (the table with class "table-striped").
+     */
+    public boolean isProductInMiniCart(String productName) {
+        try {
+            // The mini-cart dropdown uses a striped table for items, not bordered.
+            String xpath = "//div[@id='cart']//table[contains(@class,'table-striped')]//td[2]"
+                    + "[contains(., '" + productName + "')]";
+            WebElement cell = wait.until(
+                    ExpectedConditions.presenceOfElementLocated(By.xpath(xpath))
+            );
+            return cell.getText().contains(productName);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
 }
