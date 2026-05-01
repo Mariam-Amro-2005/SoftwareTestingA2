@@ -1,0 +1,2 @@
+testName,email,password,tabletName,laptopName,deliveryDate,expectedTabletPrice
+Add multiple items to cart,user22222@gmail.com,12345,Samsung Galaxy Tab 10.1,HP LP3065,2026-05-15,$199.99

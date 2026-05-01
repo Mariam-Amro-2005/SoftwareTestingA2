@@ -13,7 +13,6 @@ public class SortByNamaTest extends BaseTest {
 
         HomePage home = new HomePage(driver);
         login();
-        driver.get("http://tutorialsninja.com/demo/index.php?route=common/home");
 
         home.goToPhonesAndPDAs();
 
