@@ -1,44 +1,59 @@
 package tests;
 
 import base.BaseTest;
-import pages.*;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import pages.*;
+import utils.ExcelDataReader;
 
 public class LoginTests extends BaseTest {
 
-    @Test
-    public void validLogin() {
-        HomePage home = new HomePage(driver);
-        home.goToLogin();
-
-        LoginPage login = new LoginPage(driver);
-        login.login("alice05@example.com", "test");
-
-        Assert.assertEquals(driver.getTitle(), "My Account",
-                "Page title should be 'My Account' after successful login");
-
-        AccountPage account = new AccountPage(driver);
-        Assert.assertTrue(account.isLogoutDisplayed(),
-                "Logout link should be visible when user is logged in");
-
-        account.logout();
+    @DataProvider(name = "validLoginData")
+    public Object[][] validLoginData() {
+        return ExcelDataReader.getTestData("ValidLogin");
     }
 
-    @Test
-    public void invalidLogin() {
+    @Test(dataProvider = "validLoginData")
+    public void validLogin(String email, String password,
+                           String expectedTitle, String expectedLogoutVisible) {
         HomePage home = new HomePage(driver);
         home.goToLogin();
 
         LoginPage login = new LoginPage(driver);
-        login.login("alice05@example.com", "wrongpassword");
+        login.login(email, password);
 
-        Assert.assertEquals(login.getErrorMessage(),
-                "Warning: No match for E-Mail Address and/or Password.",
-                "Error message should match exactly");
+        Assert.assertEquals(driver.getTitle(), expectedTitle,
+                "Page title mismatch after successful login");
 
-        Assert.assertEquals(driver.getTitle(), "Account Login",
-                "Page should still be login page after failed attempt");
+        AccountPage account = new AccountPage(driver);
+        boolean logoutVisible = Boolean.parseBoolean(expectedLogoutVisible);
+        Assert.assertEquals(account.isLogoutDisplayed(), logoutVisible,
+                "Logout link visibility mismatch");
+
+        if (logoutVisible) {
+            account.logout();
+        }
+    }
+
+    @DataProvider(name = "invalidLoginData")
+    public Object[][] invalidLoginData() {
+        return ExcelDataReader.getTestData("InvalidLogin");
+    }
+
+    @Test(dataProvider = "invalidLoginData")
+    public void invalidLogin(String email, String password,
+                             String expectedErrorMessage, String expectedTitle) {
+        HomePage home = new HomePage(driver);
+        home.goToLogin();
+
+        LoginPage login = new LoginPage(driver);
+        login.login(email, password);
+
+        Assert.assertEquals(login.getErrorMessage(), expectedErrorMessage,
+                "Error message mismatch");
+        Assert.assertEquals(driver.getTitle(), expectedTitle,
+                "Page title should still be login page");
 
         AccountPage account = new AccountPage(driver);
         Assert.assertFalse(account.isLogoutDisplayed(),
