@@ -1,0 +1,2 @@
+testName,keyword,category,expectedNoResultMessage,expectedProduct,subCategorySearchEnabled
+testSearchAppleInComponentsWithSubCategories,Apple,Components,true,Apple Cinema 30,true
