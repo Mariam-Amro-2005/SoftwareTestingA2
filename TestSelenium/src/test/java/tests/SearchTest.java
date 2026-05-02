@@ -7,28 +7,22 @@ import org.testng.annotations.Test;
 import pages.HomePage;
 import pages.LoginPage;
 import pages.SearchPage;
-import utils.CSVDataReader;
-import com.opencsv.exceptions.CsvException;
-import java.io.IOException;
+import utils.ExcelDataReader;
 
 public class SearchTest extends BaseTest {
 
-    private static final String TEST_DATA_PATH = "src/test/resources/search_test_data.csv";
-
     @DataProvider(name = "searchData")
-    public Object[][] getSearchData() throws IOException, CsvException {
-        return CSVDataReader.getTestData(TEST_DATA_PATH);
+    public Object[][] getSearchData() {
+        return ExcelDataReader.getTestData("SearchData");
     }
 
     @Test(dataProvider = "searchData")
-    public void testSearchWithSubCategories(String[] data) {
-
-        String testName = data[0];
-        String keyword = data[1];
-        String category = data[2];
-        boolean expectNoResultInitially = Boolean.parseBoolean(data[3]);
-        String expectedProduct = data[4];
-        boolean enableSubCategorySearch = Boolean.parseBoolean(data[5]);
+    public void testSearchWithSubCategories(String testName,
+                                            String keyword,
+                                            String category,
+                                            String expectNoResultInitially,
+                                            String expectedProduct,
+                                            String enableSubCategorySearch) {
 
         HomePage home = new HomePage(driver);
         SearchPage searchPage = new SearchPage(driver);
@@ -49,14 +43,14 @@ public class SearchTest extends BaseTest {
         searchPage.clickSearchButton();
 
         // 5. Verify no result message (initially without sub-categories)
-        if (expectNoResultInitially) {
+        if (Boolean.parseBoolean(expectNoResultInitially)) {
             Assert.assertTrue(searchPage.isNoResultMessageDisplayed(),
                     "Expected 'no products found' message when searching '" + keyword +
                             "' in '" + category + "' without subcategories");
         }
 
         // 6. Enable "Search in subcategories" if required
-        if (enableSubCategorySearch) {
+        if (Boolean.parseBoolean(enableSubCategorySearch)) {
             searchPage.checkSearchInSubCategories();
             searchPage.clickSearchButton();
         }

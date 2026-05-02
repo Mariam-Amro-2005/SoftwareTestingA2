@@ -6,41 +6,30 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import pages.DesktopsPage;
 import pages.HomePage;
-import utils.CSVDataReader;
-import com.opencsv.exceptions.CsvException;
-
-import java.io.IOException;
+import utils.ExcelDataReader;
 
 public class CurrencyTest extends BaseTest {
 
-    private static final String TEST_DATA_PATH =
-            "src/test/resources/currency_test_data.csv";
-
-    @DataProvider(name = "currencyData")
-    public Object[][] getCurrencyData() throws IOException, CsvException {
-        return CSVDataReader.getTestData(TEST_DATA_PATH);
+    @DataProvider(name = "test-data")
+    public Object[][] getCurrencyData() {
+        return ExcelDataReader.getTestData("CurrencyData");
     }
 
-    @Test(dataProvider = "currencyData")
-    public void testCurrencyChangeOnDesktopsPage(String[] data) {
-
-        String testName = data[0];
-        String initialCurrency = data[1];
-        String changedCurrency = data[2];
+    @Test(dataProvider = "test-data")
+    public void testCurrencyChangeOnDesktopsPage(String testName,
+                                                 String initialCurrency,
+                                                 String changedCurrency) {
 
         System.out.println("Running test: " + testName);
 
-        // Login
         login();
 
         HomePage homePage = new HomePage(driver);
-
-        // Navigate
         homePage.goToAllDesktops();
 
         DesktopsPage desktopsPage = new DesktopsPage(driver);
 
-        // Default currency check (data-driven)
+        // Default currency check
         Assert.assertTrue(
                 desktopsPage.arePricesDisplayedIn(initialCurrency),
                 "Prices should be in default currency: " + initialCurrency
@@ -61,7 +50,6 @@ public class CurrencyTest extends BaseTest {
                 "Currency button mismatch"
         );
 
-        // Logout
         logout();
     }
 }

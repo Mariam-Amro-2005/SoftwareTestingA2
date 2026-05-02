@@ -19,7 +19,6 @@ public class ShoppingCartPage {
 
     public boolean isProductInCart(String productName) {
         try {
-            // Search specifically in the Product Name column (2nd <td>)
             String xpath = "//table[@class='table table-bordered']//tbody//tr//td[2]" +
                     "[contains(., '" + productName + "')]";
 
@@ -47,7 +46,6 @@ public class ShoppingCartPage {
 
     public String getProductUnitPrice(String productName) {
         try {
-            // Find the row that contains the product name and get the 5th column
             String xpath = "//table[@class='table table-bordered']/tbody/tr[td//*[contains(text(), '" + productName + "')]]/td[5]";
             WebElement priceElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
             String price = priceElement.getText();
@@ -104,12 +102,9 @@ public class ShoppingCartPage {
         }
     }
 
-    /**
-     * Checks if a product is in the mini‑cart dropdown (the table with class "table-striped").
-     */
+
     public boolean isProductInMiniCart(String productName) {
         try {
-            // The mini-cart dropdown uses a striped table for items, not bordered.
             String xpath = "//div[@id='cart']//table[contains(@class,'table-striped')]//td[2]"
                     + "[contains(., '" + productName + "')]";
             WebElement cell = wait.until(
@@ -118,6 +113,28 @@ public class ShoppingCartPage {
             return cell.getText().contains(productName);
         } catch (Exception e) {
             return false;
+        }
+    }
+
+
+
+
+
+    private final By checkoutButton = By.linkText("Checkout");
+    public void clickCheckout() {
+        try {
+            WebElement checkoutBtn = wait.until(ExpectedConditions.elementToBeClickable(checkoutButton));
+            checkoutBtn.click();
+            System.out.println("Clicked on Checkout button successfully.");
+        } catch (Exception e) {
+            System.out.println("Failed to click Checkout button: " + e.getMessage());
+            try {
+                WebElement fallbackBtn = driver.findElement(By.xpath("//a[contains(text(),'Checkout')]"));
+                fallbackBtn.click();
+                System.out.println("Clicked Checkout using fallback locator.");
+            } catch (Exception ex) {
+                throw new RuntimeException("Could not click Checkout button", ex);
+            }
         }
     }
 
