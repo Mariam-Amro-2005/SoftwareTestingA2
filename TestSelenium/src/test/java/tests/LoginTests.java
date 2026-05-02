@@ -1,22 +1,32 @@
 package tests;
 
 import base.BaseTest;
+import com.opencsv.exceptions.CsvException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import pages.*;
-import utils.ExcelDataReader;
+import utils.CSVDataReader;
+
+import java.io.IOException;
 
 public class LoginTests extends BaseTest {
 
+    private static final String VALID_LOGIN_CSV = "src/test/resources/valid_login.csv";
+    private static final String INVALID_LOGIN_CSV = "src/test/resources/invalid_login.csv";
+
     @DataProvider(name = "validLoginData")
-    public Object[][] validLoginData() {
-        return ExcelDataReader.getTestData("ValidLogin");
+    public Object[][] validLoginData() throws IOException, CsvException {
+        return CSVDataReader.getTestData(VALID_LOGIN_CSV);
     }
 
     @Test(dataProvider = "validLoginData")
-    public void validLogin(String email, String password,
-                           String expectedTitle, String expectedLogoutVisible) {
+    public void validLogin(String[] data) {
+        String email = data[0];
+        String password = data[1];
+        String expectedTitle = data[2];
+        String expectedLogoutVisible = data[3];
+
         HomePage home = new HomePage(driver);
         home.goToLogin();
 
@@ -37,13 +47,17 @@ public class LoginTests extends BaseTest {
     }
 
     @DataProvider(name = "invalidLoginData")
-    public Object[][] invalidLoginData() {
-        return ExcelDataReader.getTestData("InvalidLogin");
+    public Object[][] invalidLoginData() throws IOException, CsvException {
+        return CSVDataReader.getTestData(INVALID_LOGIN_CSV);
     }
 
     @Test(dataProvider = "invalidLoginData")
-    public void invalidLogin(String email, String password,
-                             String expectedErrorMessage, String expectedTitle) {
+    public void invalidLogin(String[] data) {
+        String email = data[0];
+        String password = data[1];
+        String expectedErrorMessage = data[2];
+        String expectedTitle = data[3];
+
         HomePage home = new HomePage(driver);
         home.goToLogin();
 

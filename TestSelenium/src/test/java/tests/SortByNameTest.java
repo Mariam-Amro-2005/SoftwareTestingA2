@@ -2,12 +2,10 @@ package tests;
 
 import base.BaseTest;
 import org.testng.annotations.Test;
-import pages.AccountPage;
 import pages.HomePage;
-import pages.LoginPage;
 import pages.PhonesAndPDAsPage;
 
-public class SortByNamaTest extends BaseTest {
+public class SortByNameTest extends BaseTest {
     @Test
     public void sortByName(){
 

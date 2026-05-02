@@ -1,0 +1,3 @@
+firstName,lastName,email,telephone,password,confirmPassword,expectedEmailError,expectedTelephoneError,expectedPasswordError
+Emily,test,,,,,,E-Mail Address does not appear to be valid!,Telephone must be between 3 and 32 characters!,Password must be between 4 and 20 characters!
+Emily,test,valid@example.com,1234567890,123,123,,,Password must be between 4 and 20 characters!

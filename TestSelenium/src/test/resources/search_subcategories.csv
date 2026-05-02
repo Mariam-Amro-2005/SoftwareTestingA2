@@ -1,0 +1,2 @@
+testName,keyword,category,expectNoResultInitially,expectedProduct,enableSubCategorySearch
+"Search iMac in Desktops","iMac","Desktops","false","iMac","true"

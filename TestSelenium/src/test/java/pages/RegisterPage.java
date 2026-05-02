@@ -58,7 +58,7 @@ public class RegisterPage {
         try {
             return driver.findElement(
                     By.xpath("//input[@id='input-email']/following-sibling::div[@class='text-danger']")
-            ).getText();
+            ).getText().trim();
         } catch (NoSuchElementException e) {
             return "";
         }
@@ -68,7 +68,7 @@ public class RegisterPage {
         try {
             return driver.findElement(
                     By.xpath("//input[@id='input-telephone']/following-sibling::div[@class='text-danger']")
-            ).getText();
+            ).getText().trim();
         } catch (NoSuchElementException e) {
             return "";
         }
@@ -78,7 +78,7 @@ public class RegisterPage {
         try {
             return driver.findElement(
                     By.xpath("//input[@id='input-password']/following-sibling::div[@class='text-danger']")
-            ).getText();
+            ).getText().trim();
         } catch (NoSuchElementException e) {
             return "";
         }

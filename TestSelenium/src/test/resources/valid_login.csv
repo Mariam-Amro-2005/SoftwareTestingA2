@@ -1,0 +1,2 @@
+email,password,expectedTitle,expectedLogoutVisible
+alice05@example.com,test,My Account,true
