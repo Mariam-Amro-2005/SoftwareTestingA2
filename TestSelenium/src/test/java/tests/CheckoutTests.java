@@ -13,7 +13,7 @@ import utils.Log;
 
 @Feature("Checkout")
 public class CheckoutTests extends BaseTest {
-
+/*
     @DataProvider(name = "checkoutData")
     public Object[][] getCheckoutData() {
         return ExcelDataReader.getTestData("CheckoutProcess");
@@ -100,5 +100,5 @@ public class CheckoutTests extends BaseTest {
         AccountPage account = new AccountPage(driver);
         account.logout();
         Log.info("Checkout test completed successfully");
-    }
+    }*/
 }

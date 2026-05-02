@@ -1,236 +1,170 @@
 package pages;
 
-import io.qameta.allure.Step;
-import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.Log;
-
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.*;
 import java.time.Duration;
-import java.util.List;
 
 public class CheckoutPage {
 
-    WebDriver driver;
-    WebDriverWait wait;
+    private final WebDriver driver;
+    private final WebDriverWait wait;
+    private final JavascriptExecutor js;
 
-    // Billing Details – Step 2
-    private final By newAddressRadio       = By.cssSelector("input[name='payment_address'][value='new']");
-    private final By firstNameInput        = By.id("input-payment-firstname");
-    private final By lastNameInput         = By.id("input-payment-lastname");
-    private final By address1Input         = By.id("input-payment-address-1");
-    private final By cityInput             = By.id("input-payment-city");
-    private final By postcodeInput         = By.id("input-payment-postcode");
-    private final By countrySelect         = By.id("input-payment-country");
-    private final By regionSelect          = By.id("input-payment-zone");
-    private final By billingContinueBtn    = By.id("button-payment-address");
+    // Billing Address Locators
+    private final By newBillingRadio = By.cssSelector("input[name='payment_address'][value='new']");
+    private final By billingFirstname = By.id("input-payment-firstname");
+    private final By billingLastname = By.id("input-payment-lastname");
+    private final By billingCompany = By.id("input-payment-company");
+    private final By billingAddress1 = By.id("input-payment-address-1");
+    private final By billingCity = By.id("input-payment-city");
+    private final By billingPostcode = By.id("input-payment-postcode");
+    private final By billingCountry = By.id("input-payment-country");
+    private final By billingZone = By.id("input-payment-zone");
+    private final By btnContinueBilling = By.id("button-payment-address");
 
-    // Shipping Address – Step 3
-    private final By shippingAddressPanelLink = By.cssSelector("a[href='#collapse-shipping-address']");
-    private final By shippingExistingRadio   = By.cssSelector("input[name='shipping_address'][value='existing']");
-    private final By shippingAddressDropdown = By.id("input-shipping-address");
-    private final By shippingAddressContinue = By.id("button-shipping-address");
+    // Shipping Address Locators
+    private final By newShippingRadio = By.cssSelector("input[name='shipping_address'][value='new']");
+    private final By shippingFirstname = By.id("input-shipping-firstname");
+    private final By shippingLastname = By.id("input-shipping-lastname");
+    private final By shippingCompany = By.id("input-shipping-company");
+    private final By shippingAddress1 = By.id("input-shipping-address-1");
+    private final By shippingCity = By.id("input-shipping-city");
+    private final By shippingPostcode = By.id("input-shipping-postcode");
+    private final By shippingCountry = By.id("input-shipping-country");
+    private final By shippingZone = By.id("input-shipping-zone");
+    private final By btnContinueShipping = By.id("button-shipping-address");
 
-    // Delivery Method – Step 4
-    private final By shippingMethodPanelLink = By.cssSelector("a[href='#collapse-shipping-method']");
-    private final By commentTextarea         = By.name("comment");
-    private final By shippingMethodContinue  = By.id("button-shipping-method");
-    private final By shippingMethodRadio     = By.cssSelector("#collapse-shipping-method .radio input");
-
-    // Payment Method – Step 5
-    private final By paymentMethodPanelLink = By.cssSelector("a[href='#collapse-payment-method']");
-    private final By termsCheckbox          = By.name("agree");
-    private final By paymentContinue        = By.id("button-payment-method");
-    private final By warningAlert           = By.cssSelector("div.alert.alert-danger");
-    private final By paymentMethodRadio     = By.cssSelector("#collapse-payment-method .radio input");
-
-    // Confirm Order – Step 6
-    private final By confirmPanelLink = By.cssSelector("a[href='#collapse-checkout-confirm']");
-    private final By confirmOrderBtn  = By.id("button-confirm");
-    private final By successHeading   = By.tagName("h1");
-    private final By cartTotalItems   = By.id("cart-total");
-    private final By orderTotalRow    = By.cssSelector("#collapse-checkout-confirm tfoot tr:last-child td:last-child");
+    // Other Locators
+    private final By flatShippingRadio = By.cssSelector("input[name='shipping_method'][value='flat.flat']");
+    private final By orderComment = By.name("comment");
+    private final By btnContinueShippingMethod = By.id("button-shipping-method");
+    private final By termsCheckbox = By.name("agree");
+    private final By btnContinuePayment = By.id("button-payment-method");
+    private final By btnConfirmOrder = By.id("button-confirm");
+    private final By successMessage = By.xpath("//h1[contains(text(),'Your order has been placed')]");
 
     public CheckoutPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(25));
+        this.js = (JavascriptExecutor) driver;
     }
 
-    private void sleepOneSec() {
-        try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+    // ====================== COUNTRY & ZONE HELPER ======================
+    private void selectCountryAndZone(By countryLocator, By zoneLocator,
+                                      String countryValue, String zoneValue) {
+
+        // Select Country
+        WebElement country = wait.until(ExpectedConditions.elementToBeClickable(countryLocator));
+        new Select(country).selectByValue(countryValue);
+
+        // Wait for zones to load via AJAX
+        wait.until(ExpectedConditions.refreshed(ExpectedConditions.elementToBeClickable(zoneLocator)));
+
+        // Additional wait for options to populate
+        wait.until(driver -> {
+            Select select = new Select(driver.findElement(zoneLocator));
+            return select.getOptions().size() > 1;
+        });
+
+        // Select Zone
+        new Select(driver.findElement(zoneLocator)).selectByValue(zoneValue);
     }
 
-    /** Generic helper to expand a panel by its link. */
-    private void openPanel(By panelLink) {
-        WebElement link = wait.until(ExpectedConditions.elementToBeClickable(panelLink));
-        String href = link.getAttribute("href");
-        String targetId = href.substring(href.indexOf("#"));
-        By panelBody = By.cssSelector(targetId);
-        WebElement panel = driver.findElement(panelBody);
-        if (panel.getAttribute("class") == null || !panel.getAttribute("class").contains("in")) {
-            link.click();
-            wait.until(ExpectedConditions.attributeContains(panelBody, "class", "in"));
+    // ====================== BILLING ADDRESS ======================
+    public void selectNewBillingAddress() {
+        clickWithJS(newBillingRadio);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(billingFirstname));
+    }
+
+    public void fillNewBillingAddress(String fn, String ln, String comp, String addr1,
+                                      String city, String post, String country, String zone) {
+        sendKeysWithClear(billingFirstname, fn);
+        sendKeysWithClear(billingLastname, ln);
+        sendKeysWithClear(billingCompany, comp);
+        sendKeysWithClear(billingAddress1, addr1);
+        sendKeysWithClear(billingCity, city);
+        sendKeysWithClear(billingPostcode, post);
+
+        selectCountryAndZone(billingCountry, billingZone, country, zone);
+    }
+
+    public void continueBillingAddress() {
+        clickWithJS(btnContinueBilling);
+    }
+
+    // ====================== SHIPPING ADDRESS ======================
+    public void selectNewShippingAddress() {
+        clickWithJS(newShippingRadio);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(shippingFirstname));
+    }
+
+    public void fillNewShippingAddress(String fn, String ln, String comp, String addr1,
+                                       String city, String post, String country, String zone) {
+        sendKeysWithClear(shippingFirstname, fn);
+        sendKeysWithClear(shippingLastname, ln);
+        sendKeysWithClear(shippingCompany, comp);
+        sendKeysWithClear(shippingAddress1, addr1);
+        sendKeysWithClear(shippingCity, city);
+        sendKeysWithClear(shippingPostcode, post);
+
+        selectCountryAndZone(shippingCountry, shippingZone, country, zone);
+    }
+
+    public void continueShippingAddress() {
+        clickWithJS(btnContinueShipping);
+    }
+
+    // ====================== HELPER METHODS ======================
+    private void sendKeysWithClear(By locator, String text) {
+        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        element.clear();
+        if (text != null && !text.isEmpty()) {
+            element.sendKeys(text);
         }
     }
 
-    // -------------------- Billing --------------------
-
-    @Step("Fill new billing address: {fName} {lName}, {addr}, {cit}, {post}, {countryName} / {regionName}")
-    public void fillNewBillingAddress(String fName, String lName,
-                                      String addr, String cit,
-                                      String post, String countryName, String regionName) {
-        Log.info("Filling new billing address for " + fName + " " + lName);
-        wait.until(ExpectedConditions.elementToBeClickable(newAddressRadio)).click();
-
-        // Wait for the new address fields to become visible
-        wait.until(ExpectedConditions.visibilityOfElementLocated(firstNameInput));
-
-        driver.findElement(firstNameInput).clear();
-        driver.findElement(firstNameInput).sendKeys(fName);
-        driver.findElement(lastNameInput).clear();
-        driver.findElement(lastNameInput).sendKeys(lName);
-        driver.findElement(address1Input).clear();
-        driver.findElement(address1Input).sendKeys(addr);
-        driver.findElement(cityInput).clear();
-        driver.findElement(cityInput).sendKeys(cit);
-        driver.findElement(postcodeInput).clear();
-        driver.findElement(postcodeInput).sendKeys(post);
-
-        // Select country (triggers AJAX region reload)
-        new Select(driver.findElement(countrySelect)).selectByVisibleText(countryName);
-
-        // Wait for the region dropdown to contain the required option,
-        // ignoring StaleElementReferenceException while the DOM refreshes.
-        WebDriverWait staleSafeWait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        staleSafeWait.ignoring(StaleElementReferenceException.class)
-                .until(d -> {
-                    Select reg = new Select(d.findElement(regionSelect));
-                    for (WebElement opt : reg.getOptions()) {
-                        if (opt.getText().equals(regionName)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                });
-
-        new Select(driver.findElement(regionSelect)).selectByVisibleText(regionName);
-        Log.info("Billing address filled successfully");
-        sleepOneSec();
-    }
-
-    @Step("Click Billing Continue")
-    public void clickBillingContinue() {
-        Log.info("Clicking Billing Continue");
-        wait.until(ExpectedConditions.elementToBeClickable(billingContinueBtn)).click();
-    }
-
-    // -------------------- Shipping Address --------------------
-
-    @Step("Select shipping address containing: {partialText}")
-    public void selectShippingAddress(String partialText) {
-        Log.info("Selecting shipping address containing '" + partialText + "'");
-        // Ensure the shipping panel is open
-        openPanel(shippingAddressPanelLink);
-
-        // Ensure the "I want to use an existing address" radio is selected
-        WebElement existingRadio = wait.until(ExpectedConditions.elementToBeClickable(shippingExistingRadio));
-        if (!existingRadio.isSelected()) {
-            existingRadio.click();
-        }
-
-        sleepOneSec(); // wait for dropdown to be ready
-        wait.until(ExpectedConditions.presenceOfElementLocated(shippingAddressDropdown));
-        Select select = new Select(driver.findElement(shippingAddressDropdown));
-        List<WebElement> options = select.getOptions();
-        for (WebElement option : options) {
-            if (option.getText().contains(partialText)) {
-                select.selectByVisibleText(option.getText());
-                return;
-            }
-        }
-        // Fallback: select the last option (newest address)
-        if (options.size() > 0) {
-            select.selectByIndex(options.size() - 1);
+    private void clickWithJS(By locator) {
+        try {
+            wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
+        } catch (Exception e) {
+            js.executeScript("arguments[0].click();", driver.findElement(locator));
         }
     }
 
-    @Step("Click Shipping Address Continue")
-    public void clickShippingAddressContinue() {
-        Log.info("Clicking Shipping Address Continue");
-        wait.until(ExpectedConditions.elementToBeClickable(shippingAddressContinue)).click();
+    // ====================== REST OF CHECKOUT ======================
+    public void selectFlatShippingMethod() {
+        clickWithJS(flatShippingRadio);
     }
 
-    // -------------------- Delivery Method --------------------
-
-    @Step("Enter delivery comment and continue: {comment}")
-    public void enterCommentAndContinue(String comment) {
-        Log.info("Waiting for shipping method to load...");
-        sleepOneSec(); // allow AJAX to start loading
-        // Wait until the radio button in the shipping method panel appears
-        wait.until(ExpectedConditions.presenceOfElementLocated(shippingMethodRadio));
-        // Ensure panel is open (it should be, but we force)
-        openPanel(shippingMethodPanelLink);
-        // Fill comment
-        WebElement area = wait.until(ExpectedConditions.elementToBeClickable(commentTextarea));
-        area.clear();
-        area.sendKeys(comment);
-        wait.until(ExpectedConditions.elementToBeClickable(shippingMethodContinue)).click();
-    }
-
-    // -------------------- Payment Method --------------------
-
-    @Step("Agree to Terms & Conditions and continue (retry up to 3 times)")
-    public void agreeTermsAndContinue() {
-        Log.info("Waiting for payment method to load...");
-        sleepOneSec(); // allow AJAX to load
-        wait.until(ExpectedConditions.presenceOfElementLocated(paymentMethodRadio));
-        openPanel(paymentMethodPanelLink);
-
-        for (int attempt = 1; attempt <= 3; attempt++) {
-            WebElement checkbox = wait.until(ExpectedConditions.elementToBeClickable(termsCheckbox));
-            if (!checkbox.isSelected()) {
-                checkbox.click();
-            }
-            driver.findElement(paymentContinue).click();
-
-            try {
-                wait.until(ExpectedConditions.visibilityOfElementLocated(warningAlert));
-                Log.warn("Terms warning appeared, retrying... attempt " + attempt);
-            } catch (Exception e) {
-                Log.info("Terms accepted successfully");
-                break;
-            }
+    public void enterOrderComment(String comment) {
+        WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(orderComment));
+        el.clear();
+        if (comment != null && !comment.isEmpty()) {
+            el.sendKeys(comment);
         }
     }
 
-    // -------------------- Confirm Order --------------------
-
-    @Step("Get confirm order total")
-    public String getConfirmTotal() {
-        sleepOneSec(); // let panel load
-        openPanel(confirmPanelLink);
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(orderTotalRow)).getText();
+    public void continueShippingMethod() {
+        clickWithJS(btnContinueShippingMethod);
     }
 
-    @Step("Click Confirm Order")
+    public void checkTermsAndConditions() {
+        clickWithJS(termsCheckbox);
+    }
+
+    public void continuePaymentMethod() {
+        clickWithJS(btnContinuePayment);
+    }
+
     public void confirmOrder() {
-        Log.info("Confirming order");
-        openPanel(confirmPanelLink);
-        wait.until(ExpectedConditions.elementToBeClickable(confirmOrderBtn)).click();
+        clickWithJS(btnConfirmOrder);
     }
 
-    @Step("Check if order placed message is displayed")
-    public boolean isOrderPlacedMessageDisplayed() {
-        WebElement h1 = wait.until(ExpectedConditions.visibilityOfElementLocated(successHeading));
-        return h1.getText().contains("Your order has been placed!");
-    }
-
-    @Step("Get mini‑cart items count text")
-    public String getCartTotalText() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(cartTotalItems)).getText();
+    public boolean isOrderPlacedSuccessfully() {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(successMessage)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

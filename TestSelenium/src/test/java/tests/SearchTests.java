@@ -1,31 +1,22 @@
 package tests;
 
 import base.BaseTest;
-import pages.*;
-
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import utils.CSVDataReader;
-import com.opencsv.exceptions.CsvException;
+import pages.HomePage;
+import pages.SearchPage;
+import utils.ExcelDataReader;
 
-import java.io.IOException;
-
-public class SearchTeasts extends BaseTest {
-
-    private static final String TEST_DATA_PATH =
-            "src/test/resources/search_data.csv";
+public class SearchTests extends BaseTest {
 
     @DataProvider(name = "searchData")
-    public Object[][] getSearchData() throws IOException, CsvException {
-        return CSVDataReader.getTestData(TEST_DATA_PATH);
+    public Object[][] getSearchData() {
+        return ExcelDataReader.getTestData("SearchData");   // Sheet name
     }
 
     @Test(dataProvider = "searchData")
-    public void searchByName(String[] data) {
-
-        String testName = data[0];
-        String keyword = data[1];
+    public void searchByName(String testName, String keyword) {
 
         System.out.println("Running test: " + testName);
 
@@ -34,12 +25,11 @@ public class SearchTeasts extends BaseTest {
 
         HomePage home = new HomePage(driver);
 
-        // 2. Search (NO hardcoded value)
+        // 2. Search
         home.search(keyword);
 
         // 3. Validate results
         SearchPage searchPage = new SearchPage(driver);
-
         Assert.assertTrue(
                 searchPage.resultMAtching(keyword),
                 "Search results do not match: " + keyword

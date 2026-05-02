@@ -1,0 +1,48 @@
+2026-05-02 03:57:03.939 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 03:57:04.367 [main] WARN  org.testng.internal.Utils - The test method 'tests.CurrencyTest.testCurrencyChangeOnDesktopsPage' will be skipped since its data provider 'currencyData' returned an empty array or iterator. 
+2026-05-02 03:57:51.132 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 03:57:51.569 [main] WARN  org.testng.internal.Utils - The test method 'tests.CurrencyTest.testCurrencyChangeOnDesktopsPage' will be skipped since its data provider 'test-data' returned an empty array or iterator. 
+2026-05-02 03:59:14.793 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 03:59:15.211 [main] WARN  org.testng.internal.Utils - The test method 'tests.CurrencyTest.testCurrencyChangeOnDesktopsPage' will be skipped since its data provider 'test-data' returned an empty array or iterator. 
+2026-05-02 04:00:14.331 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:04:25.436 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:06:52.971 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:07:19.148 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:10:13.166 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:12:57.806 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:14:31.116 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:19:36.320 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:23:22.383 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:23:59.676 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:36:19.155 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
+2026-05-02 04:37:29.582 [main] INFO  org.testng.internal.Utils - [TestNG] Running:
+  C:\Users\LENOVO I3\AppData\Local\JetBrains\IntelliJIdea2026.1\temp-testng-customsuite.xml
+
